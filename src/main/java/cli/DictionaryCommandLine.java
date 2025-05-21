@@ -77,7 +77,7 @@ public class DictionaryCommandLine {
           case "size":
             printSize();
             break;
-          case "space":
+          case "height":
             printHight();
             break;
           case "help":
@@ -170,20 +170,20 @@ public class DictionaryCommandLine {
   }
 
   private void printHight() {
-    System.out.println(INFO + "Dictionary space usage: " + VALUE + dictionary.getHight() + INFO + " units" + RESET);
+    System.out.println(INFO + "Tree height : " + VALUE + dictionary.getHight() + RESET);
   }
 
   private void printHelp() {
     System.out.println(HEADER + "Available Commands:" + RESET);
-    System.out.println(COMMAND + "  insert " + VALUE + "<word>" + RESET + "     - Insert a word into the dictionary");
-    System.out.println(COMMAND + "  delete " + VALUE + "<word>" + RESET + "     - Delete a word from the dictionary");
-    System.out.println(COMMAND + "  search " + VALUE + "<word>" + RESET + "     - Search for a word in the dictionary");
+    System.out.println(COMMAND + "  insert " + VALUE + "<word>" + RESET + "       - Insert a word into the dictionary");
+    System.out.println(COMMAND + "  delete " + VALUE + "<word>" + RESET + "       - Delete a word from the dictionary");
+    System.out.println(COMMAND + "  search " + VALUE + "<word>" + RESET + "       - Search for a word in the dictionary");
     System.out.println(COMMAND + "  batch-insert " + VALUE + "<file>" + RESET + " - Insert words from file");
     System.out.println(COMMAND + "  batch-delete " + VALUE + "<file>" + RESET + " - Delete words from file");
-    System.out.println(COMMAND + "  size" + RESET + "              - Print the current dictionary size");
-    System.out.println(COMMAND + "  space" + RESET + "             - Print the current space used by the dictionary");
-    System.out.println(COMMAND + "  help" + RESET + "              - Print this help message");
-    System.out.println(COMMAND + "  exit" + RESET + "              - Exit the program");
+    System.out.println(COMMAND + "  size" + RESET + "                - Print the current dictionary size");
+    System.out.println(COMMAND + "  height" + RESET + "              - Print the current height of the used tree");
+    System.out.println(COMMAND + "  help" + RESET + "                - Print this help message");
+    System.out.println(COMMAND + "  exit" + RESET + "                - Exit the program");
     System.out.println();
   }
 

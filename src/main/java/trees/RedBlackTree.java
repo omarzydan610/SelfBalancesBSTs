@@ -1,12 +1,10 @@
 package trees;
 
 public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingTree<T> {
-  private Node<T> root;
-  private int size;
+
 
   public RedBlackTree() {
-    this.root = null;
-    this.size = 0;
+
   }
 
   @Override

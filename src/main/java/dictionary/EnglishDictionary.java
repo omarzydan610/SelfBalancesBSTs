@@ -9,13 +9,13 @@ import trees.ISelfBalancingTree;
 import trees.RedBlackTree;
 
 public class EnglishDictionary implements IDictionary {
-    private ISelfBalancingTree tree;
+    private ISelfBalancingTree<String> tree;
 
     public EnglishDictionary(String type) {
         if (type.equalsIgnoreCase("AVL"))
-            tree = new AVLTree();
+            tree = new AVLTree<String>();
         else if (type.equalsIgnoreCase("Red-Black"))
-            tree = new RedBlackTree();
+            tree = new RedBlackTree<String>();
         else
             throw new IllegalArgumentException("Unknown tree type: " + type);
     }
