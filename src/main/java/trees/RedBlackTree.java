@@ -1,25 +1,28 @@
 package trees;
 
-public class RedBlackTree implements ISelfBalancingTree {
+public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingTree<T> {
+  private Node<T> root;
+  private int size;
 
   public RedBlackTree() {
-
+    this.root = null;
+    this.size = 0;
   }
 
   @Override
-  public boolean insert(Object key) {
+  public boolean insert(T key) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'insert'");
   }
 
   @Override
-  public boolean delete(Object key) {
+  public boolean delete(T key) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'delete'");
   }
 
   @Override
-  public boolean search(Object key) {
+  public boolean search(T key) {
     // TODO Auto-generated method stub
     throw new UnsupportedOperationException("Unimplemented method 'search'");
   }

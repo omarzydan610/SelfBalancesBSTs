@@ -1,11 +1,11 @@
 package trees;
 
-public interface ISelfBalancingTree {
-  boolean insert(Object key);
+public interface ISelfBalancingTree<T extends Comparable<T>> {
+  boolean insert(T key);
 
-  boolean delete(Object key);
+  boolean delete(T key);
 
-  boolean search(Object key);
+  boolean search(T key);
 
   int getSize();
 
