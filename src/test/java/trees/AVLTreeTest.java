@@ -1,13 +1,11 @@
-package treesTests;
+package trees;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import trees.AVLTree;
-
-public class AVLTreeTests {
+public class AVLTreeTest {
 
   private AVLTree<Integer> avlTree;
 
