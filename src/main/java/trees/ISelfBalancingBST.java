@@ -1,6 +1,6 @@
 package trees;
 
-public interface ISelfBalancingTree<T extends Comparable<T>> {
+public interface ISelfBalancingBST<T extends Comparable<T>> {
   boolean insert(T key);
 
   boolean delete(T key);

@@ -5,11 +5,11 @@ import java.io.FileReader;
 import java.io.IOException;
 
 import trees.AVLTree;
-import trees.ISelfBalancingTree;
+import trees.ISelfBalancingBST;
 import trees.RedBlackTree;
 
 public class EnglishDictionary implements IDictionary {
-    private ISelfBalancingTree<String> tree;
+    private ISelfBalancingBST<String> tree;
 
     public EnglishDictionary(String type) {
         if (type.equalsIgnoreCase("AVL"))
