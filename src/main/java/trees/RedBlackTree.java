@@ -38,6 +38,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
     }
 
     private Node<T> root;
+    private int size;
 
     public RedBlackTree() {
         this.root = null;
@@ -123,12 +124,14 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
             return false;
         root = insert(root, key);
         root.setColor(MagicNumbers.BLACK);
+        size++;
         return true;
     }
 
     @Override
     public boolean delete(T key) {
         // TODO Auto-generated method stub
+        size--; //! DO NOT REMOVE THIS
         throw new UnsupportedOperationException("Unimplemented method 'delete'");
     }
 
@@ -146,14 +149,23 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
 
     @Override
     public int getSize() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getSize'");
+        return size;
+    }
+
+    private int getHeight(Node<T> node) {
+        if (node == null) {
+            return -1; // Empty tree has height -1
+        }
+
+        int leftHeight = getHeight(node.child[MagicNumbers.LEFT]);
+        int rightHeight = getHeight(node.child[MagicNumbers.RIGHT]);
+
+        return 1 + Math.max(leftHeight, rightHeight);
     }
 
     @Override
     public int getHeight() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getHeight'");
+        return getHeight(root);
     }
 
 }
