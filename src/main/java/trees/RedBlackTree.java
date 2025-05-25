@@ -28,7 +28,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         public T getData() {
             return data;
         }
-        
+
         // Add setter for data to support in-place updates
         public void setData(T data) {
             this.data = data;
@@ -99,7 +99,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
      */
     private Node<T> insertFixUp(Node<T> node, int direction) {
         if (isRed(node.child[direction])) {
-            // Case 1: both children are red => any one child has 2 reds in a row (LL LR RL RR) => flip colors
+            // Case 1: both children are red => any one child has 2 reds in a row (LL LR RL
+            // RR) => flip colors
             if (isRed(node.child[1 - direction])) {
                 if (isRed(node.child[direction].child[direction]) || isRed(node.child[direction].child[1 - direction]))
                     colorFlip(node);
@@ -137,8 +138,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
     /**
      * Helper method for restoring Red-Black tree properties after deletion
      * 
-     * @param node the node to fix
-     * @param dir the direction (left or right) from which a black node was removed
+     * @param node  the node to fix
+     * @param dir   the direction (left or right) from which a black node was
+     *              removed
      * @param okRef reference to boolean indicating if tree is balanced
      * @return the potentially new root of the subtree
      */
@@ -203,8 +205,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
     /**
      * Helper method for deleting a node
      *
-     * @param node the current node in the recursive deletion
-     * @param key the key to delete
+     * @param node  the current node in the recursive deletion
+     * @param key   the key to delete
      * @param okRef reference to boolean indicating if tree is balanced
      * @return the potentially new root of the subtree
      */
@@ -273,11 +275,11 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         if (node == null) {
             return null;
         }
-        
+
         while (node.child[MagicNumbers.RIGHT] != null) {
             node = node.child[MagicNumbers.RIGHT];
         }
-        
+
         return node;
     }
 
@@ -286,8 +288,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         if (!search(key)) {
             return false;
         }
-        
-        boolean[] ok = {false};
+
+        boolean[] ok = { false };
         root = deleteNode(root, key, ok);
         if (root != null) {
             root.setColor(MagicNumbers.BLACK);
@@ -296,16 +298,17 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         return true;
     }
 
-    private Node<T> search(Node<T> node, T key) {
-        if (node == null || key.compareTo(node.getData()) == 0)
-            return node;
-        int direction = key.compareTo(node.getData()) < 0 ? MagicNumbers.LEFT : MagicNumbers.RIGHT;
-        return search(node.child[direction], key);
-    }
-
     @Override
     public boolean search(T key) {
-        return search(root, key) != null;
+        Node<T> curr = root;
+        while (curr != null) {
+            int cmp = key.compareTo(curr.getData());
+            if (cmp == 0) {
+                return true;
+            }
+            curr = cmp < 0 ? curr.child[MagicNumbers.LEFT] : curr.child[MagicNumbers.RIGHT];
+        }
+        return false;
     }
 
     @Override
@@ -315,7 +318,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
 
     private int getHeight(Node<T> node) {
         if (node == null) {
-            return -1; // Empty tree has height -1
+            return 0; // Empty tree has height 0
         }
 
         int leftHeight = getHeight(node.child[MagicNumbers.LEFT]);

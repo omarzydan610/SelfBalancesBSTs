@@ -25,7 +25,7 @@ public class RedBlackTreeTest {
     @Test
     @DisplayName("Insert multiple elements")
     void testInsertMultiple() {
-        int[] values = {10, 5, 15, 3, 7, 12, 18};
+        int[] values = { 10, 5, 15, 3, 7, 12, 18 };
         for (int value : values)
             assertTrue(rbt.insert(value));
 
@@ -45,8 +45,8 @@ public class RedBlackTreeTest {
     @Test
     @DisplayName("search non-existing element")
     void testSearchNonExisting() {
-        int[] insertValues = {10, 20, 30};
-        int[] searchValues = {40, 50, 60};
+        int[] insertValues = { 10, 20, 30 };
+        int[] searchValues = { 40, 50, 60 };
 
         for (int value : insertValues)
             assertTrue(rbt.insert(value));
@@ -56,7 +56,8 @@ public class RedBlackTreeTest {
     }
 
     private boolean isRed(Object node) {
-        if (node == null) return false;
+        if (node == null)
+            return false;
         try {
             java.lang.reflect.Method isRedMethod = node.getClass().getMethod("isRed");
             return (boolean) isRedMethod.invoke(node);
@@ -66,7 +67,8 @@ public class RedBlackTreeTest {
     }
 
     private Object[] getChildren(Object node) {
-        if (node == null) return null;
+        if (node == null)
+            return null;
         try {
             java.lang.reflect.Field childField = node.getClass().getDeclaredField("child");
             childField.setAccessible(true);
@@ -88,7 +90,8 @@ public class RedBlackTreeTest {
     }
 
     private void assertNoRedRedViolations(Object node) {
-        if (node == null) return;
+        if (node == null)
+            return;
         Object[] children = getChildren(node);
         if (children[0] != null) {
             assertFalse(isRed(children[0]) && isRed(node));
@@ -106,7 +109,7 @@ public class RedBlackTreeTest {
         rbt.insert(10);
         assertEquals(1, rbt.getSize());
 
-        int[] values = {5, 15, 3, 7, 12, 18};
+        int[] values = { 5, 15, 3, 7, 12, 18 };
         for (int value : values)
             rbt.insert(value);
         assertEquals(7, rbt.getSize());
@@ -117,15 +120,15 @@ public class RedBlackTreeTest {
 
     @Test
     void testGetHeight() {
-        assertEquals(-1, rbt.getHeight());
-        rbt.insert(10);
         assertEquals(0, rbt.getHeight());
+        rbt.insert(10);
+        assertEquals(1, rbt.getHeight());
 
         rbt.insert(5);
         rbt.insert(15);
-        assertEquals(1, rbt.getHeight());
+        assertEquals(2, rbt.getHeight());
 
-        int[] values = {3, 7, 12, 18, 1, 4, 6, 8};
+        int[] values = { 3, 7, 12, 18, 1, 4, 6, 8 };
         for (int value : values)
             rbt.insert(value);
         int size = rbt.getSize();
@@ -153,12 +156,12 @@ public class RedBlackTreeTest {
         assertTrue(rbt.delete(10));
         assertFalse(rbt.search(10));
         assertEquals(0, rbt.getSize());
-        assertEquals(-1, rbt.getHeight());
+        assertEquals(0, rbt.getHeight());
     }
 
     @Test
     void testDeleteAllElements() {
-        int[] values = {40, 50, 25, 75, 10, 30, 60, 80, 5, 15, 32, 27, 44, 35};
+        int[] values = { 40, 50, 25, 75, 10, 30, 60, 80, 5, 15, 32, 27, 44, 35 };
         for (int value : values)
             rbt.insert(value);
         assertEquals(values.length, rbt.getSize());
@@ -171,6 +174,6 @@ public class RedBlackTreeTest {
             }
         }
         assertEquals(0, rbt.getSize());
-        assertEquals(-1, rbt.getHeight());
+        assertEquals(0, rbt.getHeight());
     }
 }
