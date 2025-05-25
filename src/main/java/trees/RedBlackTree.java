@@ -151,31 +151,22 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
 
         Node<T> sibling = node.child[1 - dir];
 
-        // Case 1: Red Sibling
-        // Convert to black sibling case via rotation
         if (isRed(sibling)) {
             node = rotate(node, dir);
             node.child[dir].setColor(MagicNumbers.BLACK);
-            sibling = node.child[dir].child[1 - dir]; // Update sibling after rotation
+            sibling = node.child[dir].child[1 - dir];
         }
 
         // At this point, sibling must be black or null
         if (sibling == null) {
-            // No sibling to share black height - propagate the problem upwards
-            // The parent will need to be fixed in the next recursive call
             return node;
         }
 
         // Case 2: Black Sibling with at least one red child
         if (isRed(sibling.child[MagicNumbers.LEFT]) || isRed(sibling.child[MagicNumbers.RIGHT])) {
-            // Restructure to borrow a black node
-
-            // Case 2a: Black sibling with red child on the outside
             if (isRed(sibling.child[1 - dir])) {
-                // Single rotation
                 Node<T> newRoot = rotate(node, dir);
 
-                // Fix colors to preserve black height
                 newRoot.setColor(node.color);
                 node.setColor(MagicNumbers.BLACK);
                 sibling.child[1 - dir].setColor(MagicNumbers.BLACK);
@@ -189,19 +180,14 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
                 node.child[1 - dir] = rotate(sibling, 1 - dir);
                 Node<T> newRoot = rotate(node, dir);
 
-                // Fix colors to preserve black height
                 newRoot.setColor(node.color);
                 node.setColor(MagicNumbers.BLACK);
                 newRoot.child[1 - dir].setColor(MagicNumbers.BLACK);
 
-                okRef[0] = true; // Problem fixed
+                okRef[0] = true;
                 return newRoot;
             }
         }
-
-        // Case 3: Black sibling with two black children
-
-        // Recolor the sibling to red
         sibling.setColor(MagicNumbers.RED);
 
         if (isRed(node)) {
@@ -210,8 +196,6 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
             okRef[0] = true; // Problem fixed
         }
         // Case 3b: If parent is black, we've reduced its black height
-        // The black deficit problem moves up one level
-        // This will be handled in the next recursive call
 
         return node;
     }
@@ -258,19 +242,12 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
             }
             // Case 2: Node has two children
             else {
-                // Find and use inorder predecessor (maximum in left subtree)
                 Node<T> predecessor = findMax(node.child[MagicNumbers.LEFT]);
 
-                // Copy the predecessor's data
                 T predecessorData = predecessor.getData();
-
-                // Recursively delete the predecessor
                 node.child[MagicNumbers.LEFT] = deleteNode(node.child[MagicNumbers.LEFT], predecessorData, okRef);
-                
-                // Update current node's data
-                node.setData(predecessorData);
 
-                // If deletion caused a black height violation, fix it
+                node.setData(predecessorData);
                 if (!okRef[0]) {
                     node = deleteFixUp(node, MagicNumbers.LEFT, okRef);
                 }
@@ -280,13 +257,10 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         }
         // Key not found at current node, continue searching
         else {
-            // Determine search direction
             int dir = key.compareTo(node.getData()) > 0 ? MagicNumbers.RIGHT : MagicNumbers.LEFT;
-            
-            // Recursive delete in appropriate subtree
+
             node.child[dir] = deleteNode(node.child[dir], key, okRef);
-            
-            // Fix up if necessary
+
             if (!okRef[0]) {
                 node = deleteFixUp(node, dir, okRef);
             }
