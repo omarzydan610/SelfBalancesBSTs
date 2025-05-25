@@ -137,68 +137,51 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
 
     /**
      * Helper method for restoring Red-Black tree properties after deletion
-     * 
+     *
      * @param node  the node to fix
      * @param dir   the direction (left or right) from which a black node was
      *              removed
      * @param okRef reference to boolean indicating if tree is balanced
      * @return the potentially new root of the subtree
      */
-    private Node<T> deleteFixUp(Node<T> node, int dir, boolean[] okRef) {
-        if (node == null) {
-            // Empty tree case
-            okRef[0] = true;
-            return null;
-        }
+    private Node<T> deleteFixUp(Node<T> node, boolean dir, boolean[] okRef) {
+        Node<T> parent = node; // saving for later red sibling fixing case
+        Node<T> sibling = node.child[dir ? MagicNumbers.LEFT : MagicNumbers.RIGHT];
 
-        Node<T> sibling = node.child[1 - dir];
-
+        // Red Sibling Case => Reduce to Black Sibling Case
         if (isRed(sibling)) {
-            node = rotate(node, dir);
-            node.child[dir].setColor(MagicNumbers.BLACK);
-            sibling = node.child[dir].child[1 - dir];
+            node = rotate(node, dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT);
+            sibling = parent.child[dir ? MagicNumbers.LEFT : MagicNumbers.RIGHT];
         }
 
-        // At this point, sibling must be black or null
-        if (sibling == null) {
-            return node;
-        }
+        if (sibling != null) {
+            // Black Sibling Case, Part 1: Black Sibling with only black children
+            if (!isRed(sibling.child[MagicNumbers.LEFT]) && !isRed(sibling.child[MagicNumbers.RIGHT])) {
+                if (isRed(parent)) okRef[0] = true; // will color it black and sibling subtree will not have imbalance
+                parent.setColor(MagicNumbers.BLACK); // if not ok, we proceed further
+                sibling.setColor(MagicNumbers.RED);
+            } else { // Black Sibling Case, Part 2: Black Sibling with red children
+                int initcol_parent = parent.color;
+                boolean isRedSiblingReduction = !(node == parent);
 
-        // Case 2: Black Sibling with at least one red child
-        if (isRed(sibling.child[MagicNumbers.LEFT]) || isRed(sibling.child[MagicNumbers.RIGHT])) {
-            if (isRed(sibling.child[1 - dir])) {
-                Node<T> newRoot = rotate(node, dir);
+                if (isRed(sibling.child[dir ? MagicNumbers.LEFT : MagicNumbers.RIGHT])) { // RR, LL
+                    parent = rotate(parent, dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT); // single rotation
+                } else {
+                    parent = alignRotate(parent, dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT); // align and rotate
+                }
 
-                newRoot.setColor(node.color);
-                node.setColor(MagicNumbers.BLACK);
-                sibling.child[1 - dir].setColor(MagicNumbers.BLACK);
+                parent.setColor(initcol_parent); // color will be the same as initial parent
+                parent.child[MagicNumbers.LEFT].setColor(MagicNumbers.BLACK);
+                parent.child[MagicNumbers.RIGHT].setColor(MagicNumbers.BLACK);
 
-                okRef[0] = true; // Problem fixed
-                return newRoot;
-            }
-            // Case 2b: Black sibling with red child on the inside
-            else {
-                // Double rotation (align and rotate)
-                node.child[1 - dir] = rotate(sibling, 1 - dir);
-                Node<T> newRoot = rotate(node, dir);
-
-                newRoot.setColor(node.color);
-                node.setColor(MagicNumbers.BLACK);
-                newRoot.child[1 - dir].setColor(MagicNumbers.BLACK);
-
+                if (isRedSiblingReduction) {
+                    node.child[dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT] = parent; // fixing the child for proper bottom up fixing later
+                } else {
+                    node = parent; // usual black case
+                }
                 okRef[0] = true;
-                return newRoot;
             }
         }
-        sibling.setColor(MagicNumbers.RED);
-
-        if (isRed(node)) {
-            // Case 3a: If parent is red, we can color it black and be done
-            node.setColor(MagicNumbers.BLACK);
-            okRef[0] = true; // Problem fixed
-        }
-        // Case 3b: If parent is black, we've reduced its black height
-
         return node;
     }
 
@@ -216,59 +199,33 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
             return null;
         }
 
-        // Found the delete key
-        if (key.compareTo(node.getData()) == 0) {
-            // Case 1: Node has at most one child
+        // found the delete key
+        if (node.getData().compareTo(key) == 0) {
+            // has one or less child
             if (node.child[MagicNumbers.LEFT] == null || node.child[MagicNumbers.RIGHT] == null) {
-                // Determine which child exists, if any
-                int childDir = (node.child[MagicNumbers.LEFT] == null) ? MagicNumbers.RIGHT : MagicNumbers.LEFT;
-                Node<T> child = node.child[childDir];
+                Node<T> temp = null;
+                if (node.child[MagicNumbers.LEFT] != null) temp = node.child[MagicNumbers.LEFT];
+                if (node.child[MagicNumbers.RIGHT] != null) temp = node.child[MagicNumbers.RIGHT];
 
-                // Case 1a: Red node with no children - just remove it
-                if (isRed(node) && child == null) {
+                if (isRed(node)) { // the node is red => just delete it
                     okRef[0] = true;
-                    return null;
-                }
-
-                // Case 1b: Black node with red child - replace and recolor
-                if (!isRed(node) && isRed(child)) {
-                    child.setColor(MagicNumbers.BLACK);
+                } else if (isRed(temp)) { // only child is red => replace with that red child and recolor black
+                    temp.setColor(MagicNumbers.BLACK);
                     okRef[0] = true;
-                    return child;
                 }
 
-                // Case 1c: Black node with no children or black child
-                // This creates a black height violation that will need fixing
-                okRef[0] = false;
-                return child; // might be null
-            }
-            // Case 2: Node has two children
-            else {
-                Node<T> predecessor = findMax(node.child[MagicNumbers.LEFT]);
-
-                T predecessorData = predecessor.getData();
-                node.child[MagicNumbers.LEFT] = deleteNode(node.child[MagicNumbers.LEFT], predecessorData, okRef);
-
-                node.setData(predecessorData);
-                if (!okRef[0]) {
-                    node = deleteFixUp(node, MagicNumbers.LEFT, okRef);
-                }
-
-                return node;
+                return temp;
+            } else { // has 2 children => replace with inorder predecessor and recurse for that
+                Node<T> temp = findMax(node.child[MagicNumbers.LEFT]); // inorder predecessor: maximum value in the left subtree
+                node.setData(temp.getData());
+                key = temp.getData(); // updating with predecessor data as this is the one to delete now
             }
         }
-        // Key not found at current node, continue searching
-        else {
-            int dir = key.compareTo(node.getData()) > 0 ? MagicNumbers.RIGHT : MagicNumbers.LEFT;
 
-            node.child[dir] = deleteNode(node.child[dir], key, okRef);
+        boolean dir = key.compareTo(node.getData()) > 0;
+        node.child[dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT] = deleteNode(node.child[dir ? MagicNumbers.RIGHT : MagicNumbers.LEFT], key, okRef); // recurse
 
-            if (!okRef[0]) {
-                node = deleteFixUp(node, dir, okRef);
-            }
-
-            return node;
-        }
+        return okRef[0] ? node : deleteFixUp(node, dir, okRef);
     }
 
     private Node<T> findMax(Node<T> node) {
@@ -297,6 +254,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         size--;
         return true;
     }
+
 
     @Override
     public boolean search(T key) {
