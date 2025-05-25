@@ -153,7 +153,7 @@ public class RedBlackTreeTest {
         assertTrue(rbt.delete(10));
         assertFalse(rbt.search(10));
         assertEquals(0, rbt.getSize());
-        assertEquals(-1, rbt.getSize());
+        assertEquals(-1, rbt.getHeight());
     }
 
     @Test
