@@ -10,7 +10,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
     }
 
     static class Node<T> {
-        private final T data;
+        // Remove final to allow in-place updates during deletion
+        private T data;
         private int color;
 
         // 0 for left child
@@ -26,6 +27,11 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
 
         public T getData() {
             return data;
+        }
+        
+        // Add setter for data to support in-place updates
+        public void setData(T data) {
+            this.data = data;
         }
 
         public boolean isRed() {
@@ -128,11 +134,166 @@ public class RedBlackTree<T extends Comparable<T>> implements ISelfBalancingBST<
         return true;
     }
 
+    /**
+     * Helper method for restoring Red-Black tree properties after deletion
+     * 
+     * @param node the node to fix
+     * @param dir the direction (left or right) from which a black node was removed
+     * @param okRef reference to boolean indicating if tree is balanced
+     * @return the potentially new root of the subtree
+     */
+    private Node<T> deleteFixUp(Node<T> node, int dir, boolean[] okRef) {
+        if (node == null) {
+            // Empty tree case
+            okRef[0] = true;
+            return null;
+        }
+
+        Node<T> sibling = node.child[1 - dir];
+
+        if (isRed(sibling)) {
+            node = rotate(node, dir);
+            node.child[dir].setColor(MagicNumbers.BLACK);
+            sibling = node.child[dir].child[1 - dir];
+        }
+
+        // At this point, sibling must be black or null
+        if (sibling == null) {
+            return node;
+        }
+
+        // Case 2: Black Sibling with at least one red child
+        if (isRed(sibling.child[MagicNumbers.LEFT]) || isRed(sibling.child[MagicNumbers.RIGHT])) {
+            if (isRed(sibling.child[1 - dir])) {
+                Node<T> newRoot = rotate(node, dir);
+
+                newRoot.setColor(node.color);
+                node.setColor(MagicNumbers.BLACK);
+                sibling.child[1 - dir].setColor(MagicNumbers.BLACK);
+
+                okRef[0] = true; // Problem fixed
+                return newRoot;
+            }
+            // Case 2b: Black sibling with red child on the inside
+            else {
+                // Double rotation (align and rotate)
+                node.child[1 - dir] = rotate(sibling, 1 - dir);
+                Node<T> newRoot = rotate(node, dir);
+
+                newRoot.setColor(node.color);
+                node.setColor(MagicNumbers.BLACK);
+                newRoot.child[1 - dir].setColor(MagicNumbers.BLACK);
+
+                okRef[0] = true;
+                return newRoot;
+            }
+        }
+        sibling.setColor(MagicNumbers.RED);
+
+        if (isRed(node)) {
+            // Case 3a: If parent is red, we can color it black and be done
+            node.setColor(MagicNumbers.BLACK);
+            okRef[0] = true; // Problem fixed
+        }
+        // Case 3b: If parent is black, we've reduced its black height
+
+        return node;
+    }
+
+    /**
+     * Helper method for deleting a node
+     *
+     * @param node the current node in the recursive deletion
+     * @param key the key to delete
+     * @param okRef reference to boolean indicating if tree is balanced
+     * @return the potentially new root of the subtree
+     */
+    private Node<T> deleteNode(Node<T> node, T key, boolean[] okRef) {
+        if (node == null) {
+            okRef[0] = true;
+            return null;
+        }
+
+        // Found the delete key
+        if (key.compareTo(node.getData()) == 0) {
+            // Case 1: Node has at most one child
+            if (node.child[MagicNumbers.LEFT] == null || node.child[MagicNumbers.RIGHT] == null) {
+                // Determine which child exists, if any
+                int childDir = (node.child[MagicNumbers.LEFT] == null) ? MagicNumbers.RIGHT : MagicNumbers.LEFT;
+                Node<T> child = node.child[childDir];
+
+                // Case 1a: Red node with no children - just remove it
+                if (isRed(node) && child == null) {
+                    okRef[0] = true;
+                    return null;
+                }
+
+                // Case 1b: Black node with red child - replace and recolor
+                if (!isRed(node) && isRed(child)) {
+                    child.setColor(MagicNumbers.BLACK);
+                    okRef[0] = true;
+                    return child;
+                }
+
+                // Case 1c: Black node with no children or black child
+                // This creates a black height violation that will need fixing
+                okRef[0] = false;
+                return child; // might be null
+            }
+            // Case 2: Node has two children
+            else {
+                Node<T> predecessor = findMax(node.child[MagicNumbers.LEFT]);
+
+                T predecessorData = predecessor.getData();
+                node.child[MagicNumbers.LEFT] = deleteNode(node.child[MagicNumbers.LEFT], predecessorData, okRef);
+
+                node.setData(predecessorData);
+                if (!okRef[0]) {
+                    node = deleteFixUp(node, MagicNumbers.LEFT, okRef);
+                }
+
+                return node;
+            }
+        }
+        // Key not found at current node, continue searching
+        else {
+            int dir = key.compareTo(node.getData()) > 0 ? MagicNumbers.RIGHT : MagicNumbers.LEFT;
+
+            node.child[dir] = deleteNode(node.child[dir], key, okRef);
+
+            if (!okRef[0]) {
+                node = deleteFixUp(node, dir, okRef);
+            }
+
+            return node;
+        }
+    }
+
+    private Node<T> findMax(Node<T> node) {
+        if (node == null) {
+            return null;
+        }
+        
+        while (node.child[MagicNumbers.RIGHT] != null) {
+            node = node.child[MagicNumbers.RIGHT];
+        }
+        
+        return node;
+    }
+
     @Override
     public boolean delete(T key) {
-        // TODO Auto-generated method stub
-        size--; //! DO NOT REMOVE THIS
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        if (!search(key)) {
+            return false;
+        }
+        
+        boolean[] ok = {false};
+        root = deleteNode(root, key, ok);
+        if (root != null) {
+            root.setColor(MagicNumbers.BLACK);
+        }
+        size--;
+        return true;
     }
 
     private Node<T> search(Node<T> node, T key) {
